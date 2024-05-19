@@ -1,6 +1,5 @@
 import {Construct} from 'constructs';
-import {Fn, S3Backend, TerraformOutput, TerraformStack} from 'cdktf';
-import {Vpc} from '@cdktf/provider-aws/lib/vpc';
+import {Fn, TerraformOutput} from 'cdktf';
 import {Subnet} from '@cdktf/provider-aws/lib/subnet';
 import {InternetGateway} from '@cdktf/provider-aws/lib/internet-gateway';
 import {RouteTable} from '@cdktf/provider-aws/lib/route-table';
@@ -10,7 +9,6 @@ import {AwsProvider} from '@cdktf/provider-aws/lib/provider';
 import {Alb} from '@cdktf/provider-aws/lib/alb';
 import {AlbTargetGroup} from '@cdktf/provider-aws/lib/alb-target-group';
 import {LbListener} from '@cdktf/provider-aws/lib/lb-listener';
-import {TlsProvider} from '@cdktf/provider-tls/lib/provider';
 import {EcsCluster} from '@cdktf/provider-aws/lib/ecs-cluster';
 import {EcsTaskDefinition} from '@cdktf/provider-aws/lib/ecs-task-definition';
 import {EcsService} from '@cdktf/provider-aws/lib/ecs-service';
@@ -20,21 +18,17 @@ import {IamRolePolicyAttachment} from "@cdktf/provider-aws/lib/iam-role-policy-a
 import {CloudwatchLogGroup} from "@cdktf/provider-aws/lib/cloudwatch-log-group";
 import {DbInstance} from "@cdktf/provider-aws/lib/db-instance";
 
-export class LanchoneteConstruct extends TerraformStack {
-    constructor(scope: Construct, id: string, {cidrBlock, prefix}: { cidrBlock: string, prefix: string }) {
+export class LanchoneteConstruct extends Construct {
+    constructor(scope: Construct, id: string, {mainVpc, prefix, dockerImage, containerDefinitions}: {
+        mainVpc: { id: string, cidrBlock: string },
+        prefix: string
+        dockerImage: string
+        containerDefinitions?: string
+    }) {
         super(scope, id);
-
-        new AwsProvider(this, 'aws',
+        new AwsProvider(scope, 'aws',
             {region: 'us-east-1'});
 
-        new S3Backend(
-            this,
-            {key: "terraform-state.json", bucket: "lanchonete"}
-        )
-
-        new TlsProvider(this, 'tls', {});
-
-        const mainVpc = new Vpc(this, 'vpc', {cidrBlock, enableDnsHostnames: true, tags: {name: 'main', prefix}});
 
         const zones = ['us-east-1a', 'us-east-1b', 'us-east-1c'];
         const createSubnet = (id: string, cidr: number) => new Subnet(this, id, {
@@ -104,7 +98,7 @@ export class LanchoneteConstruct extends TerraformStack {
             instanceClass: 'db.t3.micro',
             username: 'postgres',
             password: 'psltest2024',
-            dbName: 'lanchonete',
+            dbName: prefix.concat('db'),
             dbSubnetGroupName: dbSubnetGroup.name,
             allocatedStorage: 20,
             port: 5432,
@@ -154,9 +148,9 @@ export class LanchoneteConstruct extends TerraformStack {
             memory: '512',
             requiresCompatibilities: ['FARGATE'],
             executionRoleArn: executionRole.arn,
-            containerDefinitions: Fn.jsonencode([{
+            containerDefinitions: containerDefinitions || Fn.jsonencode([{
                 name: `${prefix}-container`,
-                image: 'kschltz/lanchonete:latest', // replace with your Docker image
+                image: dockerImage, // replace with your Docker image
                 essential: true,
                 portMappings: [{
                     containerPort: 8080,
