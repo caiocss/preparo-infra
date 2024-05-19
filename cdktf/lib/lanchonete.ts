@@ -1,5 +1,5 @@
 import {Construct} from 'constructs';
-import {Fn, TerraformOutput, TerraformStack} from 'cdktf';
+import {Fn, S3Backend, TerraformOutput, TerraformStack} from 'cdktf';
 import {Vpc} from '@cdktf/provider-aws/lib/vpc';
 import {Subnet} from '@cdktf/provider-aws/lib/subnet';
 import {InternetGateway} from '@cdktf/provider-aws/lib/internet-gateway';
@@ -24,7 +24,13 @@ export class LanchoneteConstruct extends TerraformStack {
     constructor(scope: Construct, id: string, {cidrBlock, prefix}: { cidrBlock: string, prefix: string }) {
         super(scope, id);
 
-        new AwsProvider(this, 'aws', {region: 'us-east-1'});
+        new AwsProvider(this, 'aws',
+            {region: 'us-east-1'});
+
+        new S3Backend(
+            this,
+            {key: "terraform-state.json", bucket: "lanchonete"}
+        )
 
         new TlsProvider(this, 'tls', {});
 
