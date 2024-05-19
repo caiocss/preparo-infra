@@ -12,7 +12,6 @@ permissions:
 jobs:
   cdktf:
     name: "CDKTF Deploy"
-    needs: "CDKTF Plan"
     runs-on: ubuntu-latest
     defaults:
       run:
