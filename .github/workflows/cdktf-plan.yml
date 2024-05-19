@@ -1,4 +1,4 @@
-name: "Comment a Plan on a PR"
+name: "CDKTF Plan"
 
 on: [pull_request, push, workflow_dispatch]
 
@@ -7,8 +7,8 @@ permissions:
   pull-requests: write
 
 jobs:
-  terraform:
-    name: "Terraform CDK Diff"
+  cdktf:
+    name: "CDKTF Plan"
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -27,16 +27,8 @@ jobs:
       - name: Generate module and provider bindings
         run: npx cdktf-cli get
 
-      - name: Run Terraform CDK
-        uses: hashicorp/terraform-cdk-action@v4
+      - name: Run CDKTF Plan
+        run: npx cdktf-cli plan
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          cdktfVersion: 0.20.7
-          terraformVersion: 1.8.3
-          mode: plan-only
-          stackName: lanchonete
-          terraformCloudToken: ${{ secrets.TF_API_TOKEN }}
-          githubToken: ${{ secrets.GITHUB_TOKEN }}
