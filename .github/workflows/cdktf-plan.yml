@@ -33,6 +33,6 @@ jobs:
           cdktfVersion: 0.20.7
           terraformVersion: 1.8.3
           mode: plan-only
-          stackName: my-lanchonete
+          stackName: lanchonete
           terraformCloudToken: ${{ secrets.TF_API_TOKEN }}
           githubToken: ${{ secrets.GITHUB_TOKEN }}
