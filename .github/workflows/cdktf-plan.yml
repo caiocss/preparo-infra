@@ -29,6 +29,10 @@ jobs:
 
       - name: Run Terraform CDK
         uses: hashicorp/terraform-cdk-action@v4
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           cdktfVersion: 0.20.7
           terraformVersion: 1.8.3
