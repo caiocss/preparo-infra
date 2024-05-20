@@ -1,5 +1,5 @@
 import {App, S3Backend, TerraformStack} from "cdktf";
-import {LanchoneteConstruct} from "./lib/lanchonete";
+import {PreparoConstruct} from "./lib/preparo";
 import {Construct} from "constructs";
 import {AwsProvider} from "@cdktf/provider-aws/lib/provider";
 import {Vpc} from "@cdktf/provider-aws/lib/vpc";
@@ -19,10 +19,10 @@ class DevStack extends TerraformStack {
             tags: {name: 'main', prefix: "development"}
         });
 
-        new LanchoneteConstruct(this, "lanchonete", {
+        new PreparoConstruct(this, "preparo", {
             mainVpc: mainVpc,
-            prefix: "lanchonete",
-            dockerImage: 'kschltz/lanchonete:latest'
+            prefix: "preparo",
+            dockerImage: 'caiocss/preparo-service:latest'
         });
     }
 }
@@ -31,7 +31,7 @@ class DevStack extends TerraformStack {
 const app = new App();
 const devStack = new DevStack(app, 'development');
 new S3Backend(devStack,
-    {key: "terraform/terraform.state", bucket: "lanchonete", region: "us-east-1"}
+    {key: "terraform/terraform.state", bucket: "preparo-service", region: "us-east-1"}
 )
 app.synth();
 
